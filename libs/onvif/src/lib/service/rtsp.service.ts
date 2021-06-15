@@ -8,15 +8,15 @@ const DEFAULT_FFMPEG_CMD = 'ffmpeg'
 const LOGGER_CONTEXT = 'RtspSubscriber'
 
 @Injectable()
-export class RtspSubscriber {
+export class RtspService {
   private readonly ffmpegCmd: string = DEFAULT_FFMPEG_CMD
   private readonly logger = new Logger(LOGGER_CONTEXT)
 
-  private connectToServer (args: string[], server: string) {
+  private connectToServer (args: string[], server: string, cmd: string = this.ffmpegCmd) {
     this.logger.log(`Trying connect to server: ${server}`)
     let connected = false
-    return new Observable<{ buffer?: Buffer, error: boolean }>((subscribe) => {
-      const command = spawn(this.ffmpegCmd, args)
+    return new Observable<{ buffer?: Buffer, error: boolean, disconnected?: boolean }>((subscribe) => {
+      const command = spawn(cmd, args)
       command.stdout.on('data', (data) => {
         if (!connected) {
           this.logger.log(`Connected to server: ${server}`)
@@ -32,9 +32,8 @@ export class RtspSubscriber {
       command.on('error', () => {
         subscribe.next({ error: true })
       })
-      command.on('close', code => {
-        this.logger.warn(`Close with code ${code}`)
-        subscribe.next({ error: true })
+      command.on('close', () => {
+        subscribe.next({ error: false, disconnected: true })
       })
     })
   }
@@ -83,6 +82,33 @@ export class RtspSubscriber {
           return of(data)
         }),
         map((data) => data.buffer as Buffer)
+      )
+  }
+
+  getVideoResolution (input: string): Observable<{ width: number, height: number } | null> {
+    const args = [
+      '-v', 'error',
+      '-select_streams', 'v:0',
+      '-show_entries', 'stream=width,height',
+      '-of', 'csv=s=x:p=0',
+      input
+    ]
+    const cmd = 'ffprobe'
+    return this.connectToServer(args, input, cmd)
+      .pipe(
+        map((data) => {
+          if (!data.buffer || data.error) {
+            return null
+          }
+          const resolution = data.buffer.toString().trim().split('x').filter(val => !!val)
+          if (resolution.length !== 2) {
+            return null
+          }
+          return {
+            width: +resolution[0],
+            height: +resolution[1]
+          }
+        })
       )
   }
 }

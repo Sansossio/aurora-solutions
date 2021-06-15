@@ -37,9 +37,15 @@ export class OnvifDiscovery {
     return Promise.all<InstacedCamera>(
       cams.map(async (cam) => {
         await cam.connect()
+
+        const deviceInfo = await cam.getDeviceInformation()
+
         return {
           name: await cam.getDeviceCustomName(),
-          rtsp: await cam.getRtspUrl(),
+          rtsp: {
+            url: await cam.getRtspUrl(),
+            resolution: deviceInfo.resolution
+          },
           player: cam
         }
       })

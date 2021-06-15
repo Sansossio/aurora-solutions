@@ -1,7 +1,8 @@
 import { Cam } from 'onvif'
 import { Observable } from 'rxjs'
+import { take } from 'rxjs/operators'
 import { ConnectRtspDto } from '../service/dto/connect.rtsp.dto'
-import { RtspSubscriber } from '../service/rtsp.service'
+import { RtspService } from '../service/rtsp.service'
 import { GetDevice, RegisterCamera } from './type'
 
 const DEFAULT_ONVIF_PORT = 2020
@@ -39,10 +40,11 @@ export class OnvifCamera {
           reject(err)
           return
         }
-        await Promise.all([
-          this.getDeviceInformation(),
-          this.getRtspUrl()
-        ])
+
+        // Load info
+        await this.getRtspUrl()
+        await this.getDeviceInformation()
+
         resolve()
       })
     })
@@ -59,12 +61,18 @@ export class OnvifCamera {
         resolve(this.deviceInfo)
         return
       }
-      this.camInstance.getDeviceInformation((err, data) => {
+      this.camInstance.getDeviceInformation(async (err, data) => {
         if (err) {
           reject(err)
           return
         }
-        this.deviceInfo = GetDevice.fromData(data)
+        const resolution = await new RtspService()
+          .getVideoResolution(this.rtspUrl)
+          .pipe(
+            take(1)
+          )
+          .toPromise()
+        this.deviceInfo = GetDevice.fromData(data, resolution)
         resolve(this.deviceInfo)
       })
     })
@@ -88,6 +96,14 @@ export class OnvifCamera {
     })
   }
 
+  getVideoBuffer (config?: ConnectRtspDto): Observable<Buffer> {
+    return new RtspService()
+      .getVideoBuffer({
+        ...config,
+        input: this.rtspUrl
+      })
+  }
+
   motionSensor (): Observable<boolean> {
     return new Observable((subscriber) => {
       this.camInstance.on('event', (event) => {
@@ -101,13 +117,5 @@ export class OnvifCamera {
         subscriber.next(val)
       })
     })
-  }
-
-  getVideoBuffer (config?: ConnectRtspDto): Observable<Buffer> {
-    return new RtspSubscriber()
-      .getVideoBuffer({
-        ...config,
-        input: this.rtspUrl
-      })
   }
 }

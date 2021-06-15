@@ -1,6 +1,24 @@
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { InstacedCamera } from '@aurora-solutions/onvif'
 import { plainToClass } from 'class-transformer'
+
+export class ResolutionRtspCameraListDto {
+  @ApiProperty()
+  width: number
+
+  @ApiProperty()
+  height: number
+}
+
+export class RtspCameraListDto {
+  @ApiProperty({
+    example: 'rtsp://{user}}:{password}@{host}:{port}/{path}'
+  })
+  url: string
+
+  @ApiPropertyOptional({ type: ResolutionRtspCameraListDto })
+  resolution?: ResolutionRtspCameraListDto
+}
 
 export class CameraListDto {
   @ApiProperty({
@@ -8,16 +26,15 @@ export class CameraListDto {
   })
   name: string
 
-  @ApiProperty({
-    example: 'rtsp://{user}}:{password}@{host}:{port}/{path}'
-  })
-  rtspUrl: string
+  @ApiProperty({ type: RtspCameraListDto })
+  rtsp: RtspCameraListDto
 
   static fromIntacedCamera (val: InstacedCamera): CameraListDto {
-    return plainToClass(CameraListDto, {
+    const value: CameraListDto = {
       name: val.name,
-      rtspUrl: val.rtsp
-    })
+      rtsp: val.rtsp
+    }
+    return plainToClass(CameraListDto, value)
   }
 
   static fromInstancedCameras (data: InstacedCamera[]): CameraListDto[] {
