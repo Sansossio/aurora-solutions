@@ -4,7 +4,7 @@ export interface RegisterOnvifModuleConfig {
   useFactory: (...args) => RegisterOnvifModule | Promise<RegisterOnvifModule>
 }
 
-export interface RegisterOnvifModule {
+export class RegisterOnvifModule {
   credentials?: {
     username?: string
     password?: string
