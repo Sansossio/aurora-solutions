@@ -6,9 +6,9 @@
 
 ## NX workflow
 
-### Generate an Angular application
+### Generate an React application
 
-`ng g @nrwl/angular:app my-app`
+`nx generate @nrwl/react:app my-app`
 
 ### Generate a nestJS application
 
