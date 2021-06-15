@@ -31,7 +31,7 @@ export class OnvifDiscovery {
     })
   }
 
-  async searchAndInstantiateCameras () {
+  async searchAndInstantiateCameras (): Promise<InstacedCamera[]> {
     const cams = await this.searchCameras()
 
     return Promise.all<InstacedCamera>(
