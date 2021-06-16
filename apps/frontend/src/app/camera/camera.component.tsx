@@ -16,9 +16,17 @@ export function Camera ({ camera }: { camera: CameraList }) {
   const { proxy } = environment.backend
   const videoWrapper = useRef<any>(null)
 
+  let player: typeof JSMpeg.VideoElement
+
   useEffect(() => {
-    const url = `${proxy}/stream/camera?rtsp=${encodeURIComponent(camera.rtsp.url)}`
-    void new JSMpeg.VideoElement(videoWrapper.current, url)
+    if (!player) {
+      const url = `${proxy}/stream/camera?rtsp=${encodeURIComponent(camera.rtsp.url)}`
+      // eslint-disable-next-line
+      player = new JSMpeg.VideoElement(videoWrapper.current, url)
+    }
+    return () => {
+      player.destroy()
+    }
   })
 
   return (

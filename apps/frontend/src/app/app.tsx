@@ -6,6 +6,7 @@ import { CameraList } from '@aurora-solutions/api-interface'
 
 export function App () {
   const [cameras, setCameras] = useState<CameraList[]>([])
+  const [showCameras, setShowCameras] = useState(false)
 
   useEffect(() => {
     if (cameras.length) {
@@ -21,7 +22,8 @@ export function App () {
 
   return (
     <>
-      {cameras.map(c => (<Camera camera={c} key={c.name} />))}
+      <button onClick={() => setShowCameras(!showCameras)}>Toggle cameras</button>
+      {showCameras && cameras.map(c => (<Camera camera={c} key={c.name} />))}
     </>
   )
 }
