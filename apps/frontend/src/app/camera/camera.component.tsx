@@ -20,15 +20,15 @@ export function Camera ({ camera }: { camera: CameraList }) {
 
   let player: typeof JSMpeg.VideoElement
 
-  function getSizeClass () {
+  function getSize () {
     if (!camera.rtsp.resolution) {
-      return `size-${DEFAULT_SIZE}`
+      return DEFAULT_SIZE
     }
     function getBetterSize (val: number) {
       const interval = 20
       return Math.floor(val / interval) * interval
     }
-    return `size-${getBetterSize(camera.rtsp.resolution.width)}x${getBetterSize(camera.rtsp.resolution.height)}`
+    return `${getBetterSize(camera.rtsp.resolution.width)}x${getBetterSize(camera.rtsp.resolution.height)}`
   }
 
   useEffect(() => {
@@ -45,7 +45,7 @@ export function Camera ({ camera }: { camera: CameraList }) {
   return (
     <div>
       <p>Camera: {camera.name}</p>
-      <div className={`videoWrapper ${getSizeClass()}`} ref={videoWrapper}></div>
+      <div className={`videoWrapper size-${getSize()}`} ref={videoWrapper}></div>
     </div>
   )
 }
