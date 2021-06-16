@@ -12,11 +12,24 @@ const JSMpeg = require('@cycjimmy/jsmpeg-player')
   window.location.reload()
 }
 
+const DEFAULT_SIZE = '800x600'
+
 export function Camera ({ camera }: { camera: CameraList }) {
   const { proxy } = environment.backend
   const videoWrapper = useRef<any>(null)
 
   let player: typeof JSMpeg.VideoElement
+
+  function getSizeClass () {
+    if (!camera.rtsp.resolution) {
+      return `size-${DEFAULT_SIZE}`
+    }
+    function getBetterSize (val: number) {
+      const interval = 20
+      return Math.floor(val / interval) * interval
+    }
+    return `size-${getBetterSize(camera.rtsp.resolution.width)}x${getBetterSize(camera.rtsp.resolution.height)}`
+  }
 
   useEffect(() => {
     if (!player) {
@@ -32,7 +45,7 @@ export function Camera ({ camera }: { camera: CameraList }) {
   return (
     <div>
       <p>Camera: {camera.name}</p>
-      <div className='videoWrapper size-100x100' ref={videoWrapper}></div>
+      <div className={`videoWrapper ${getSizeClass()}`} ref={videoWrapper}></div>
     </div>
   )
 }
