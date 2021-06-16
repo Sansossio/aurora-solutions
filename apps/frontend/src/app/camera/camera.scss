@@ -2,3 +2,14 @@
   width: 800px;
   height: 600px;
 }
+@for $i from 1 through 20 {
+  @for $j from 1 through 20 {
+    $width: $i * 100;
+    $height: $j * 100;
+    .size-#{$width}x#{($height)} {
+      width: #{$width}px;
+      height: #{$height}px;
+    }
+  }
+}
+

@@ -32,7 +32,7 @@ export function Camera ({ camera }: { camera: CameraList }) {
   return (
     <div>
       <p>Camera: {camera.name}</p>
-      <div className='videoWrapper' ref={videoWrapper}></div>
+      <div className='videoWrapper size-100x100' ref={videoWrapper}></div>
     </div>
   )
 }
