@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { GET_CAMERAS_PROVIDER_KEY, InstacedCamera, OnvifDiscovery } from '@aurora-solutions/onvif'
+import { GET_CAMERAS_PROVIDER_KEY, InstancedCamera, OnvifDiscovery } from '@aurora-solutions/onvif'
 import { CameraListDto } from '../dto/camera-list.dto'
 
 @Injectable()
 export class CamerasService {
   constructor (
     @Inject(GET_CAMERAS_PROVIDER_KEY)
-    private cameras: InstacedCamera[],
+    private cameras: InstancedCamera[],
     private readonly onvifDiscovery: OnvifDiscovery
   ) {}
 

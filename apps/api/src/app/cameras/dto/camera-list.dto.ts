@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { InstacedCamera } from '@aurora-solutions/onvif'
+import { InstancedCamera } from '@aurora-solutions/onvif'
 import { plainToClass } from 'class-transformer'
 import { CameraList } from '@aurora-solutions/api-interface'
 
@@ -30,7 +30,7 @@ export class CameraListDto implements CameraList {
   @ApiProperty({ type: RtspCameraListDto })
   rtsp: RtspCameraListDto
 
-  static fromIntacedCamera (val: InstacedCamera): CameraListDto {
+  static fromIntacedCamera (val: InstancedCamera): CameraListDto {
     const value: CameraListDto = {
       name: val.name,
       rtsp: val.rtsp
@@ -38,7 +38,7 @@ export class CameraListDto implements CameraList {
     return plainToClass(CameraListDto, value)
   }
 
-  static fromInstancedCameras (data: InstacedCamera[]): CameraListDto[] {
+  static fromInstancedCameras (data: InstancedCamera[]): CameraListDto[] {
     return data.map(CameraListDto.fromIntacedCamera)
   }
 }

@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import { Discovery } from 'onvif'
 import { OnvifCamera } from '../../camera/onvif-camera'
 import { RegisterOnvifModule, REGISTER_ONVIF_PROVIDER_KEY } from '../../register-onvif-module'
-import { InstacedCamera } from '../../type/instaced-camera'
+import { InstancedCamera } from '../../type/instaced-camera'
 
 @Injectable()
 export class OnvifDiscovery {
@@ -31,10 +31,10 @@ export class OnvifDiscovery {
     })
   }
 
-  async searchAndInstantiateCameras (): Promise<InstacedCamera[]> {
+  async searchAndInstantiateCameras (): Promise<InstancedCamera[]> {
     const cams = await this.searchCameras()
 
-    return Promise.all<InstacedCamera>(
+    return Promise.all<InstancedCamera>(
       cams.map(async (cam) => {
         await cam.connect()
 

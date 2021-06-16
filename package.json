@@ -48,7 +48,6 @@
     "react-router-dom": "5.2.0",
     "reflect-metadata": "^0.1.13",
     "regenerator-runtime": "0.13.7",
-    "rtsp-relay": "^1.4.0",
     "rxjs": "~6.6.3",
     "swagger-ui-express": "^4.1.6",
     "tslib": "^2.0.0"

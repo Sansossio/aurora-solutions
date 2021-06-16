@@ -1,7 +1,7 @@
 import { OnvifCamera } from '../camera/onvif-camera'
 import { GetDeviceResolution } from '../camera/type'
 
-export class InstacedCamera {
+export class InstancedCamera {
   name: string
   player?: OnvifCamera
   rtsp?: {

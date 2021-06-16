@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { spawn } from 'child_process'
 import { Observable, of } from 'rxjs'
-import { map, mergeMap, skipWhile } from 'rxjs/operators'
+import { filter, map, mergeMap, skipWhile } from 'rxjs/operators'
 import { ConnectRtspDto } from './dto/connect.rtsp.dto'
 
 const DEFAULT_FFMPEG_CMD = 'ffmpeg'
@@ -33,6 +33,9 @@ export class RtspService {
         subscribe.next({ error: true })
       })
       command.on('close', () => {
+        if (cmd === this.ffmpegCmd) {
+          Logger.warn(`Closed command: "${[cmd, ...args].join(' ')}"`)
+        }
         subscribe.next({ error: false, disconnected: true })
       })
     })
@@ -42,7 +45,7 @@ export class RtspService {
     const {
       input: url,
       quality,
-      rate = 10,
+      rate = 30,
       resolution
     } = config
     const args = [
@@ -51,7 +54,8 @@ export class RtspService {
       '-r', rate.toString(),
       ...(quality !== undefined ? ['-q:v', quality.toString()] : []),
       ...(resolution ? ['-s', resolution] : []),
-      '-f', 'image2',
+      '-f', 'mpegts',
+      '-codec:v', 'mpeg1video',
       '-update', '1',
       '-'
     ]
@@ -66,15 +70,9 @@ export class RtspService {
             return
           }
 
-          const offset = data.buffer[data.buffer.length - 2].toString(16)
-          const offset2 = data.buffer[data.buffer.length - 1].toString(16)
-
-          if (offset !== 'ff' || offset2 !== 'd9') {
-            return true
-          }
-
           return false
         }),
+        filter(val => !!val),
         mergeMap((data) => {
           if (data.error) {
             return this.getVideoBuffer(config)
