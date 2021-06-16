@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Camera } from './camera/camera.component'
 import { environment } from '../environments/environment'
+import { CameraList } from '@aurora-solutions/api-interface'
 
 export function App () {
-  const [cameras, setCameras] = useState<any[]>([])
+  const [cameras, setCameras] = useState<CameraList[]>([])
 
   useEffect(() => {
     if (cameras.length) {

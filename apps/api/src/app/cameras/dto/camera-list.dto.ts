@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { InstacedCamera } from '@aurora-solutions/onvif'
 import { plainToClass } from 'class-transformer'
+import { CameraList } from '@aurora-solutions/api-interface'
 
 export class ResolutionRtspCameraListDto {
   @ApiProperty()
@@ -20,7 +21,7 @@ export class RtspCameraListDto {
   resolution?: ResolutionRtspCameraListDto
 }
 
-export class CameraListDto {
+export class CameraListDto implements CameraList {
   @ApiProperty({
     example: 'CameraModel#Serial'
   })

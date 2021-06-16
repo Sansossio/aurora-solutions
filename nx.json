@@ -48,6 +48,9 @@
       "implicitDependencies": [
         "frontend"
       ]
+    },
+    "api-interface": {
+      "tags": []
     }
   }
 }
