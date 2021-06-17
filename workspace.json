@@ -294,6 +294,31 @@
           }
         }
       }
+    },
+    "socketio": {
+      "root": "libs/socketio",
+      "sourceRoot": "libs/socketio/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/socketio/**/*.ts"
+            ]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": [
+            "coverage/libs/socketio"
+          ],
+          "options": {
+            "jestConfig": "libs/socketio/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      }
     }
   }
 }

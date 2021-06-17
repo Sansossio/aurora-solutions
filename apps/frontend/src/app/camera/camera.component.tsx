@@ -1,24 +1,14 @@
-import React, { useEffect, useRef } from 'react'
-import { environment } from '../../environments/environment'
+import React, { useEffect, useState } from 'react'
 import { CameraList } from '@aurora-solutions/api-interface'
+import { Player } from '../player/player.component'
+import io from 'socket.io-client'
 
 import './camera.scss'
-
-// eslint-disable-next-line
-const JSMpeg = require('@cycjimmy/jsmpeg-player')
-
-// Remove this shit
-;(module as any).hot.invalidate = () => {
-  window.location.reload()
-}
 
 const DEFAULT_SIZE = '800x600'
 
 export function Camera ({ camera }: { camera: CameraList }) {
-  const { proxy } = environment.backend
-  const videoWrapper = useRef<any>(null)
-
-  let player: typeof JSMpeg.VideoElement
+  const [isMotion, setIsMotion] = useState(false)
 
   function getSize () {
     if (!camera.rtsp.resolution) {
@@ -32,20 +22,25 @@ export function Camera ({ camera }: { camera: CameraList }) {
   }
 
   useEffect(() => {
-    if (!player) {
-      const url = `${proxy}/stream/camera?rtsp=${encodeURIComponent(camera.rtsp.url)}`
-      // eslint-disable-next-line
-      player = new JSMpeg.VideoElement(videoWrapper.current, url)
-    }
+    const socket = io('http://localhost:3333/cameras', { transports: ['websocket'] })
+    socket.on('connect', () => {
+      socket.emit('subscribe', camera.name)
+    })
+    socket.on('isMotion', ({ isMotion, name }) => {
+      if (camera.name === name) {
+        setIsMotion(isMotion)
+      }
+    })
     return () => {
-      player.destroy()
+      socket.disconnect()
     }
   })
 
   return (
     <div>
       <p>Camera: {camera.name}</p>
-      <div className={`videoWrapper size-${getSize()}`} ref={videoWrapper}></div>
+      <p>Is <b>{!isMotion && 'not'}</b> moving</p>
+      <Player key={camera.rtsp.url} rtspUrl={camera.rtsp.url} size={getSize()} />
     </div>
   )
 }

@@ -3,6 +3,7 @@ import { OnvifModule } from '@aurora-solutions/onvif'
 import { CamerasService } from './service/cameras.service'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { CamerasController } from './controller/cameras.controller'
+import { CamerasEvents } from './ws/cameras.events'
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { CamerasController } from './controller/cameras.controller'
     CamerasController
   ],
   providers: [
-    CamerasService
+    CamerasService,
+    CamerasEvents
   ]
 })
 export class CamerasModule {}

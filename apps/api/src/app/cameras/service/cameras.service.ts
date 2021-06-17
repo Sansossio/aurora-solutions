@@ -10,6 +10,10 @@ export class CamerasService {
     private readonly onvifDiscovery: OnvifDiscovery
   ) {}
 
+  getCameras () {
+    return this.cameras
+  }
+
   async list (): Promise<CameraListDto[]> {
     return CameraListDto.fromInstancedCameras(this.cameras)
   }
