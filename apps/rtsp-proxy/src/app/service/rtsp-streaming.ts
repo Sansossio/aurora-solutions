@@ -3,43 +3,47 @@ import { filter, map } from 'rxjs/operators'
 
 const CONNECTED_STATUS = 1
 
+interface StreamingsRtsp {
+  users: WebSocket[]
+}
+
 export class RtspStreaming {
-  private users: { socket: WebSocket, rtspUrl: string }[] = []
-  private readonly streamings: string[] = []
+  private readonly streamings: Map<string, StreamingsRtsp> = new Map()
 
-  private getUsersSubscribedToStream (rtspUrl: string) {
-    // Remove unconnected users
-    this.users = this.users.filter(u => u.socket.readyState === CONNECTED_STATUS)
+  private instantiateSocket (socket: WebSocket, rtspUrl: string) {
+    this.streamings.set(rtspUrl, { users: [socket] })
 
-    return this.users.filter((u) => {
-      return u.rtspUrl === rtspUrl
-    })
-  }
-
-  private instantiateSocket (rtspUrl: string) {
-    this.streamings.push(rtspUrl)
     new RtspService()
       .getVideoBuffer({ input: rtspUrl })
       .pipe(
         map(({ buffer }) => {
+          const { users } = this.streamings.get(rtspUrl)
           return {
             buffer,
-            users: this.getUsersSubscribedToStream(rtspUrl)
+            users
           }
         }),
-        filter(data => !!data.users.length)
+        filter(({ users }) => !!users.length)
       )
       .subscribe(({ buffer, users }) => {
         for (const user of users) {
-          user.socket.send(buffer)
+          user.send(buffer)
         }
       })
   }
 
   addUsersToStreaming (socket: WebSocket, rtspUrl: string) {
-    this.users.push({ socket, rtspUrl })
-    if (!this.streamings.includes(rtspUrl)) {
-      this.instantiateSocket(rtspUrl)
+    socket.onclose = () => {
+      const stream = this.streamings.get(rtspUrl)
+      stream.users = stream.users.filter(u => u.readyState === CONNECTED_STATUS)
     }
+
+    const exists = this.streamings.get(rtspUrl)
+    if (exists) {
+      exists.users.push(socket)
+      return
+    }
+
+    this.instantiateSocket(socket, rtspUrl)
   }
 }
