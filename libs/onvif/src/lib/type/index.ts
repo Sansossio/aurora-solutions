@@ -1,1 +1,1 @@
-export * from './instaced-camera'
+export * from './instanced-camera'

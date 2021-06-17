@@ -1,6 +1,6 @@
 import { Provider } from '@nestjs/common'
 import { OnvifDiscovery } from '../service/discover/onvif-discover.service'
-import { InstancedCamera } from '../type/instaced-camera'
+import { InstancedCamera } from '../type/instanced-camera'
 
 export const GET_CAMERAS_PROVIDER_KEY = Symbol('GET_CAMERAS_PROVIDER_KEY')
 

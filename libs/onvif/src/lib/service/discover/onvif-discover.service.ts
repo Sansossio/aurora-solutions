@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import { Discovery } from 'onvif'
 import { OnvifCamera } from '../../camera/onvif-camera'
 import { RegisterOnvifModule, REGISTER_ONVIF_PROVIDER_KEY } from '../../register-onvif-module'
-import { InstancedCamera } from '../../type/instaced-camera'
+import { InstancedCamera } from '../../type/instanced-camera'
 
 @Injectable()
 export class OnvifDiscovery {
