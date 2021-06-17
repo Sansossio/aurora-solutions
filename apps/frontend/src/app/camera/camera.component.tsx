@@ -3,8 +3,6 @@ import { CameraList } from '@aurora-solutions/api-interface'
 import { Player } from '../player/player.component'
 import io from 'socket.io-client'
 
-import './camera.scss'
-
 const DEFAULT_SIZE = '800x600'
 
 export function Camera ({ camera }: { camera: CameraList }) {
