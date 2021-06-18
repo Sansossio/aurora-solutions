@@ -15,7 +15,7 @@ const JSMpeg = require('@cycjimmy/jsmpeg-player')
 }
 
 export class Player extends React.Component<PlayerProps, Object> {
-  // @ts-expect-error Ignore error bc this will be instantiate on didMount
+  // @ts-expect-error: Ignore error bc this will be instantiate on didMount
   private socket: Socket
 
   private videoWrapperRef: HTMLDivElement | null = null
