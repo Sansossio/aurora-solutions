@@ -4,8 +4,8 @@
   "license": "MIT",
   "scripts": {
     "nx": "nx",
-    "start": "nx serve",
-    "start:all": "nx run-many --target=serve --all --parallel",
+    "start": "nx serve --host 0.0.0.0",
+    "start:all": "nx run-many --target=serve --all --parallel --host 0.0.0.0",
     "build": "nx build",
     "test": "nx test",
     "lint": "nx workspace-lint && nx lint",
