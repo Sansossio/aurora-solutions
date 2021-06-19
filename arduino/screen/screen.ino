@@ -19,7 +19,6 @@ void loop()
 {
   while (Serial.available() > 0)
   {
-    delay(50);
     char recieved = Serial.read();
     inData += recieved;
 
