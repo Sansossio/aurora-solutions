@@ -54,6 +54,9 @@
     },
     "socketio": {
       "tags": []
+    },
+    "utils": {
+      "tags": []
     }
   }
 }

@@ -26,6 +26,9 @@
       ],
       "@aurora-solutions/socketio": [
         "libs/socketio/src/index.ts"
+      ],
+      "@aurora-solutions/utils": [
+        "libs/utils/src/index.ts"
       ]
     }
   },
