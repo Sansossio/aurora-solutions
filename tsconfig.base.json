@@ -29,6 +29,9 @@
       ],
       "@aurora-solutions/utils": [
         "libs/utils/src/index.ts"
+      ],
+      "@aurora-solutions/arduino": [
+        "libs/arduino/src/index.ts"
       ]
     }
   },
