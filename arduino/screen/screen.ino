@@ -2,6 +2,7 @@
 #include <LiquidCrystal.h>
 
 #define tempPin 0
+#define motionPin 2
 
 // initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(7, 8, 9, 10, 11, 12);
@@ -13,12 +14,16 @@ String inData;
 void setup()
 {
   Serial.begin(9600);
+
+  pinMode(tempPin, INPUT);
+  pinMode(motionPin, INPUT);
+
   lcd.begin(16, 2);
   lcd.setCursor(0, 1);
   lcd.print(DEFAULT_MESSAGE);
 }
 
-void printToScreen()
+void printFromSerial()
 {
   while (Serial.available() > 0)
   {
@@ -60,8 +65,26 @@ void setTemperature()
   delay(500);
 }
 
+void motionSensor()
+{
+  int motion = digitalRead(motionPin);
+  Serial.println(motion);
+  String text = "No movement";
+  
+  if (motion == 1) {
+    text = "Motion detected";
+  }
+
+  lcd.setCursor(0, 1);
+  if (lastMessage != text) {
+    lcd.print(text);
+    lcd.print("      "); 
+    lastMessage = text;
+  }
+}
+
 void loop()
 {
-  printToScreen();
+  printFromSerial();
   setTemperature();
 }
