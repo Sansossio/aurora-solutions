@@ -18,21 +18,7 @@ void setup()
   lcd.print(DEFAULT_MESSAGE);
 }
 
-void setTemperature()
-{
-  int tempReading = analogRead(tempPin);
-  // This is OK
-  double tempK = log(10000.0 * ((1024.0 / tempReading - 1)));
-  tempK = 1 / (0.001129148 + (0.000234125 + (0.0000000876741 * tempK * tempK)) * tempK); //  Temp Kelvin
-  float tempC = tempK - 273.15;                                                          // Convert Kelvin to Celcius
-  lcd.setCursor(0, 0);
-  lcd.print("Temp         C  ");
-  lcd.setCursor(6, 0);
-  lcd.print(tempC);
-  delay(500);
-}
-
-void loop()
+void printToScreen()
 {
   while (Serial.available() > 0)
   {
@@ -58,5 +44,24 @@ void loop()
       inData = "";
     }
   }
+}
+
+void setTemperature()
+{
+  int tempReading = analogRead(tempPin);
+  // This is OK
+  double tempK = log(10000.0 * ((1024.0 / tempReading - 1)));
+  tempK = 1 / (0.001129148 + (0.000234125 + (0.0000000876741 * tempK * tempK)) * tempK); //  Temp Kelvin
+  float tempC = tempK - 273.15;                                                          // Convert Kelvin to Celcius
+  lcd.setCursor(0, 0);
+  lcd.print("Temp         C  ");
+  lcd.setCursor(6, 0);
+  lcd.print(tempC);
+  delay(500);
+}
+
+void loop()
+{
+  printToScreen();
   setTemperature();
 }
