@@ -11,7 +11,7 @@ export class OnvifDiscovery {
     private readonly config: RegisterOnvifModule
   ) {}
 
-  async searchCameras (): Promise<OnvifCamera[]> {
+  async search (): Promise<OnvifCamera[]> {
     return new Promise((resolve, reject) => {
       Discovery.probe((err, cams) => {
         if (err) {
@@ -31,17 +31,24 @@ export class OnvifDiscovery {
     })
   }
 
-  async searchAndInstantiateCameras (): Promise<InstancedCamera[]> {
-    const cams = await this.searchCameras()
+  async searchCameras (currentCameras: InstancedCamera[] = []): Promise<InstancedCamera[]> {
+    const cams = await this.search()
 
     return Promise.all<InstancedCamera>(
       cams.map(async (cam) => {
         await cam.connect()
+        const name = await cam.getDeviceCustomName()
+
+        // Cache existing cameras
+        const exists = currentCameras.find(c => c.name === name)
+        if (exists) {
+          return exists
+        }
 
         const deviceInfo = await cam.getDeviceInformation()
 
         return {
-          name: await cam.getDeviceCustomName(),
+          name,
           rtsp: {
             url: await cam.getRtspUrl(),
             resolution: deviceInfo.resolution

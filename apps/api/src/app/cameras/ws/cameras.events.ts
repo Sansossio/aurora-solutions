@@ -1,7 +1,9 @@
 import { WebSocketGateway, SubscribeMessage, MessageBody, ConnectedSocket, WebSocketServer } from '@nestjs/websockets'
-import { CamerasService } from '../service/cameras.service'
-import { Socket, Server } from 'socket.io'
+
+import { MotionSensorEvents } from '@aurora-solutions/events'
 import { Arduino } from '@aurora-solutions/arduino'
+import { Socket, Server } from 'socket.io'
+
 @WebSocketGateway({ namespace: '/cameras' })
 export class CamerasEvents {
   private readonly arduino = new Arduino('COM3')
@@ -9,7 +11,7 @@ export class CamerasEvents {
   private readonly server: Server
 
   constructor (
-    private readonly cameraService: CamerasService
+    private readonly motionEvents: MotionSensorEvents
   ) {
     void this.motionSensorEvent()
   }
@@ -19,26 +21,22 @@ export class CamerasEvents {
   }
 
   private motionSensorEvent () {
-    for (const camera of this.cameraService.getCameras()) {
-      if (!camera.player) {
-        continue
-      }
-
-      camera
-        .player
-        .motionSensor()
-        .subscribe((isMotion) => {
+    this.motionEvents
+      .listen()
+      .subscribe(
+        ({ camera: name, isMotion }) => {
           // Send to arduino screen
           let arduinoMessage = ''
           if (isMotion) {
             arduinoMessage = 'Moving detected'
           }
           void this.arduino.write(arduinoMessage)
-          // Send to browser
-          this.server.to(this.getCameraRoomName(camera.name))
-            .emit('isMotion', { isMotion, name: camera.name })
-        })
-    }
+
+          // Send to ws channel
+          this.server.to(this.getCameraRoomName(name))
+            .emit('isMotion', { isMotion, name: name })
+        }
+      )
   }
 
   @SubscribeMessage('subscribe')

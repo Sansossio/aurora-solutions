@@ -8,6 +8,6 @@ export const getCamerasProvider: Provider = {
   provide: GET_CAMERAS_PROVIDER_KEY,
   inject: [OnvifDiscovery],
   useFactory: async (discovery: OnvifDiscovery): Promise<InstancedCamera[]> => {
-    return discovery.searchAndInstantiateCameras()
+    return discovery.searchCameras()
   }
 }

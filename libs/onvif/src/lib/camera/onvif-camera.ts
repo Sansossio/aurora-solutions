@@ -6,7 +6,6 @@ import { RtspService } from '../service/rtsp.service'
 import { GetDevice, RegisterCamera } from './type'
 
 const DEFAULT_ONVIF_PORT = 2020
-const IS_MOTION_EVENT_NAME = 'IsMotion'
 
 export class OnvifCamera {
   private camInstance: Cam
@@ -24,6 +23,10 @@ export class OnvifCamera {
 
     const credentials = `rtsp://${this.config.username}:${this.config.password}@`
     return uri.replace(/rtsp:\/\//gm, credentials)
+  }
+
+  getInstance () {
+    return this.camInstance
   }
 
   async connect () {
@@ -104,17 +107,10 @@ export class OnvifCamera {
       })
   }
 
-  motionSensor (): Observable<boolean> {
+  subscribeToEvent (eventName: string): Observable<any> {
     return new Observable((subscriber) => {
-      this.camInstance.on('event', (event) => {
-        const {
-          Name: name,
-          Value: val
-        } = event.message.message.data.simpleItem.$
-        if (name !== IS_MOTION_EVENT_NAME) {
-          return
-        }
-        subscriber.next(val)
+      this.camInstance.on(eventName, (event) => {
+        subscriber.next(event)
       })
     })
   }

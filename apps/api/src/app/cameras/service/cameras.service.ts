@@ -19,7 +19,7 @@ export class CamerasService {
   }
 
   async reloadCameras () {
-    this.cameras = await this.onvifDiscovery.searchAndInstantiateCameras()
+    this.cameras = await this.onvifDiscovery.searchCameras()
     return this.list()
   }
 }

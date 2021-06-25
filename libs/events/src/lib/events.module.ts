@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common'
+import { ScheduleModule } from '@nestjs/schedule'
 import { OnvifModule } from '@aurora-solutions/onvif'
+import { MotionSensorEvents } from './motion-sensor/motion-sensor.events'
+import { CamerasSource } from './sources/cameras.source'
 import { ConfigModule, ConfigService } from '@nestjs/config'
-import { CamerasController } from './controller/cameras.controller'
-import { CamerasEvents } from './ws/cameras.events'
-import { EventsModule } from '@aurora-solutions/events'
-import { CamerasService } from './service/cameras.service'
 
 @Module({
   imports: [
@@ -20,14 +19,14 @@ import { CamerasService } from './service/cameras.service'
       }),
       inject: [ConfigService]
     }),
-    EventsModule
-  ],
-  controllers: [
-    CamerasController
+    ScheduleModule.forRoot()
   ],
   providers: [
-    CamerasService,
-    CamerasEvents
+    CamerasSource,
+    MotionSensorEvents
+  ],
+  exports: [
+    MotionSensorEvents
   ]
 })
-export class CamerasModule {}
+export class EventsModule {}

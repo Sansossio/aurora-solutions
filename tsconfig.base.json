@@ -10,33 +10,18 @@
     "importHelpers": true,
     "target": "es2015",
     "module": "esnext",
-    "lib": [
-      "es2017",
-      "dom"
-    ],
+    "lib": ["es2017", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@aurora-solutions/onvif": [
-        "libs/onvif/src/index.ts"
-      ],
-      "@aurora-solutions/api-interface": [
-        "libs/api-interface/src/index.ts"
-      ],
-      "@aurora-solutions/socketio": [
-        "libs/socketio/src/index.ts"
-      ],
-      "@aurora-solutions/utils": [
-        "libs/utils/src/index.ts"
-      ],
-      "@aurora-solutions/arduino": [
-        "libs/arduino/src/index.ts"
-      ]
+      "@aurora-solutions/onvif": ["libs/onvif/src/index.ts"],
+      "@aurora-solutions/api-interface": ["libs/api-interface/src/index.ts"],
+      "@aurora-solutions/socketio": ["libs/socketio/src/index.ts"],
+      "@aurora-solutions/utils": ["libs/utils/src/index.ts"],
+      "@aurora-solutions/arduino": ["libs/arduino/src/index.ts"],
+      "@aurora-solutions/events": ["libs/events/src/index.ts"]
     }
   },
-  "exclude": [
-    "node_modules",
-    "tmp"
-  ]
+  "exclude": ["node_modules", "tmp"]
 }
