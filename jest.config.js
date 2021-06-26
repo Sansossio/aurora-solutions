@@ -7,7 +7,7 @@ module.exports = {
     "<rootDir>/libs/api-interface",
     "<rootDir>/libs/socketio",
     "<rootDir>/libs/utils",
-    "<rootDir>/libs/arduino",
     "<rootDir>/libs/events",
+    "<rootDir>/libs/device",
   ],
 };

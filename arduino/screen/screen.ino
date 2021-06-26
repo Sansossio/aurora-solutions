@@ -1,5 +1,6 @@
 // include the library code:
 #include <LiquidCrystal.h>
+#include <ArduinoJson.h>
 
 #define tempPin 0
 #define motionPin 2
@@ -13,7 +14,7 @@ String inData;
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   pinMode(tempPin, INPUT);
   pinMode(motionPin, INPUT);
@@ -21,6 +22,17 @@ void setup()
   lcd.begin(16, 2);
   lcd.setCursor(0, 1);
   lcd.print(DEFAULT_MESSAGE);
+
+  sendDeviceType("SCREEN");
+}
+
+void sendDeviceType(String type)
+{
+  DynamicJsonDocument doc(15);
+  doc["type"] = type;
+  String json;
+  serializeJson(doc, json);
+  Serial.println(json);
 }
 
 void printFromSerial()
@@ -35,6 +47,7 @@ void printFromSerial()
     {
       inData.trim();
       Serial.println(inData);
+
       if (inData == "")
       {
         inData = DEFAULT_MESSAGE;
@@ -70,15 +83,17 @@ void motionSensor()
   int motion = digitalRead(motionPin);
   Serial.println(motion);
   String text = "No movement";
-  
-  if (motion == 1) {
+
+  if (motion == 1)
+  {
     text = "Motion detected";
   }
 
   lcd.setCursor(0, 1);
-  if (lastMessage != text) {
+  if (lastMessage != text)
+  {
     lcd.print(text);
-    lcd.print("      "); 
+    lcd.print("      ");
     lastMessage = text;
   }
 }

@@ -1,12 +1,10 @@
 import { WebSocketGateway, SubscribeMessage, MessageBody, ConnectedSocket, WebSocketServer } from '@nestjs/websockets'
 
 import { MotionSensorEvents } from '@aurora-solutions/events'
-import { Arduino } from '@aurora-solutions/arduino'
 import { Socket, Server } from 'socket.io'
 
 @WebSocketGateway({ namespace: '/cameras' })
 export class CamerasEvents {
-  private readonly arduino = new Arduino('COM3')
   @WebSocketServer()
   private readonly server: Server
 
@@ -25,13 +23,6 @@ export class CamerasEvents {
       .listen()
       .subscribe(
         ({ camera: name, isMotion }) => {
-          // Send to arduino screen
-          let arduinoMessage = ''
-          if (isMotion) {
-            arduinoMessage = 'Moving detected'
-          }
-          void this.arduino.write(arduinoMessage)
-
           // Send to ws channel
           this.server.to(this.getCameraRoomName(name))
             .emit('isMotion', { isMotion, name: name })

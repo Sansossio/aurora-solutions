@@ -345,31 +345,6 @@
         }
       }
     },
-    "arduino": {
-      "root": "libs/arduino",
-      "sourceRoot": "libs/arduino/src",
-      "projectType": "library",
-      "targets": {
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "options": {
-            "lintFilePatterns": [
-              "libs/arduino/**/*.ts"
-            ]
-          }
-        },
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": [
-            "coverage/libs/arduino"
-          ],
-          "options": {
-            "jestConfig": "libs/arduino/jest.config.js",
-            "passWithNoTests": true
-          }
-        }
-      }
-    },
     "events": {
       "root": "libs/events",
       "sourceRoot": "libs/events/src",
@@ -390,6 +365,31 @@
           ],
           "options": {
             "jestConfig": "libs/events/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      }
+    },
+    "device": {
+      "root": "libs/device",
+      "sourceRoot": "libs/device/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/device/**/*.ts"
+            ]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": [
+            "coverage/libs/device"
+          ],
+          "options": {
+            "jestConfig": "libs/device/jest.config.js",
             "passWithNoTests": true
           }
         }
