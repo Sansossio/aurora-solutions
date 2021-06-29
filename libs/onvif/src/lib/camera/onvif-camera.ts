@@ -25,6 +25,10 @@ export class OnvifCamera {
     return uri.replace(/rtsp:\/\//gm, credentials)
   }
 
+  getConfig () {
+    return this.config
+  }
+
   getInstance () {
     return this.camInstance
   }

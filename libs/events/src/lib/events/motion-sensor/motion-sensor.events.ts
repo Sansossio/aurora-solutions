@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { Observable, Subscriber } from 'rxjs'
-import { DeviceType } from '../../../../../device/src'
+import { Subscriber } from 'rxjs'
+import { DeviceType } from '@aurora-solutions/device'
 import { BaseEvents } from '../base.events'
 
 const IS_MOTION_EVENT_NAME = 'IsMotion'
@@ -18,13 +18,17 @@ export class MotionSensorEvents extends BaseEvents<MotionSensor> {
     void this.deviceService.sendTo(DeviceType.SCREEN, messageToPrint)
   }
 
-  private cameraMotionEvents (subscriber: Subscriber<MotionSensor>) {
+  private cameraMotionEvents (subscribe: Subscriber<MotionSensor>) {
     for (const camera of this.cameras) {
       if (!camera.player) {
         this.logger.warn(`Camera "${camera.name} does not have a valid player to subscribe"`)
         continue
       }
-      camera.player.subscribeToEvent(EVENT_NAME)
+      const obsId = `camera-${camera.name}`
+
+      this.removeSubscription(obsId)
+
+      const obs = camera.player.subscribeToEvent(EVENT_NAME)
         .subscribe((event) => {
           const {
             Name: name,
@@ -37,20 +41,19 @@ export class MotionSensorEvents extends BaseEvents<MotionSensor> {
 
           void this.sendToScreens(!!val)
 
-          subscriber.next({
+          subscribe.next({
             camera: camera.name,
             isMotion: !!val
           })
         })
+      this.currentSubscriptions.set(obsId, obs)
     }
   }
 
-  private arduinoMotionEvents (subscriber: Subscriber<MotionSensor>) {}
+  private arduinoMotionEvents (subscribe: Subscriber<MotionSensor>) {}
 
   init () {
-    this.observable = new Observable<{ camera: string, isMotion: boolean }>((subscriber) => {
-      this.cameraMotionEvents(subscriber)
-      this.arduinoMotionEvents(subscriber)
-    })
+    this.cameraMotionEvents(this.subscribe)
+    this.arduinoMotionEvents(this.subscribe)
   }
 }

@@ -51,7 +51,9 @@ export class Arduino {
 
       this.port.on('error', async (e) => {
         this.logger.error(e)
-        void this.reconnect()
+        if (!e.message?.includes('Access denied')) {
+          void this.reconnect()
+        }
       })
 
       this.port.on('close', () => {

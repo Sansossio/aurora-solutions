@@ -1,4 +1,4 @@
-import { Controller, Get, Post } from '@nestjs/common'
+import { Controller, Get } from '@nestjs/common'
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { CameraListDto } from '../dto/camera-list.dto'
 import { CamerasService } from '../service/cameras.service'
@@ -15,12 +15,5 @@ export class CamerasController {
   @ApiOkResponse({ type: CameraListDto, isArray: true })
   async list () {
     return this.service.list()
-  }
-
-  @Post('reload')
-  @ApiOperation({ summary: 'Reload and get cameras list' })
-  @ApiOkResponse({ type: CameraListDto, isArray: true })
-  async reload () {
-    return this.service.reloadCameras()
   }
 }

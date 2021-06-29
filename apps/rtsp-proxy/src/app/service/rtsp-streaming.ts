@@ -16,6 +16,7 @@ export class RtspStreaming {
     new RtspService()
       .getVideoBuffer({ input: rtspUrl })
       .pipe(
+        filter(val => !!val),
         map(({ buffer }) => {
           const { users } = this.streamings.get(rtspUrl)
           return {

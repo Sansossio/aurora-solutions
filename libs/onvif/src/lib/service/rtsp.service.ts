@@ -12,14 +12,26 @@ export class RtspService {
   private readonly ffmpegCmd: string = DEFAULT_FFMPEG_CMD
   private readonly logger = new Logger(LOGGER_CONTEXT)
 
-  private connectToServer (args: string[], server: string, cmd: string = this.ffmpegCmd) {
-    this.logger.log(`Trying connect to server: ${server}`)
+  private connectToServer (args: string[], server: string, logs = true, cmd: string = this.ffmpegCmd) {
+    const logger = () => {
+      if (!logs) {
+        return {
+          log: (_msg: string) => {},
+          warn: (_msg: string) => {}
+        }
+      }
+      return this.logger
+    }
+
+    logger().log(`Trying connect to server: ${server}`)
+
     let connected = false
+
     return new Observable<{ buffer?: Buffer, error: boolean, disconnected?: boolean }>((subscribe) => {
       const command = spawn(cmd, args)
       command.stdout.on('data', (data) => {
         if (!connected) {
-          this.logger.log(`Connected to server: ${server}`)
+          logger().log(`Connected to server: ${server}`)
         }
         connected = true
 
@@ -29,13 +41,13 @@ export class RtspService {
       command.stderr.on('data', data => {
         subscribe.next({ error: true, buffer: data })
       })
+
       command.on('error', () => {
         subscribe.next({ error: true })
       })
+
       command.on('close', () => {
-        if (cmd === this.ffmpegCmd) {
-          Logger.warn(`Closed command: "${[cmd, ...args].join(' ')}"`)
-        }
+        logger().warn(`Closed command: "${[cmd, ...args].join(' ')}"`)
         subscribe.next({ error: false, disconnected: true })
       })
     })
@@ -48,6 +60,7 @@ export class RtspService {
       rate = 30,
       resolution
     } = config
+
     const args = [
       '-loglevel', 'quiet',
       '-i', url,
@@ -59,6 +72,7 @@ export class RtspService {
       '-update', '1',
       '-'
     ]
+
     return this.connectToServer(args, config.input)
       .pipe(
         skipWhile((data) => {
@@ -91,8 +105,10 @@ export class RtspService {
       '-of', 'csv=s=x:p=0',
       input
     ]
+    const showLogs = false
     const cmd = 'ffprobe'
-    return this.connectToServer(args, input, cmd)
+
+    return this.connectToServer(args, input, showLogs, cmd)
       .pipe(
         map((data) => {
           if (!data.buffer || data.error) {

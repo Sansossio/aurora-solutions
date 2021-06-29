@@ -1,7 +1,6 @@
 import { DynamicModule } from '@nestjs/common'
-import { getCamerasProvider, GET_CAMERAS_PROVIDER_KEY } from './provider/get-cameras.provider'
 import { RegisterOnvifModuleConfig, REGISTER_ONVIF_PROVIDER_KEY } from './register-onvif-module'
-import { OnvifDiscovery } from './service/discover/onvif-discover.service'
+import { OnvifDiscovery } from './service/discover/onvif.discovery'
 
 export class OnvifModule {
   static forRootAsync (config: RegisterOnvifModuleConfig): DynamicModule {
@@ -12,7 +11,6 @@ export class OnvifModule {
       ],
       providers: [
         OnvifDiscovery,
-        getCamerasProvider,
         {
           provide: REGISTER_ONVIF_PROVIDER_KEY,
           useFactory: config.useFactory,
@@ -20,8 +18,7 @@ export class OnvifModule {
         }
       ],
       exports: [
-        OnvifDiscovery,
-        GET_CAMERAS_PROVIDER_KEY
+        OnvifDiscovery
       ]
     }
   }
