@@ -75,9 +75,7 @@ export class OnvifCamera {
         }
         const resolution = await new RtspService()
           .getVideoResolution(this.rtspUrl)
-          .pipe(
-            take(1)
-          )
+          .pipe(take(1))
           .toPromise()
         this.deviceInfo = GetDevice.fromData(data, resolution)
         resolve(this.deviceInfo)
