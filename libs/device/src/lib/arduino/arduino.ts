@@ -8,10 +8,12 @@ import { delay, mergeMap } from 'rxjs/operators'
 const LOGS_CONTEXT = 'Arduino'
 const CONNECTION_DELAY = 2000
 const DEFAULT_BRAUDRATE = 115200
+const MAX_RECONNECT_TRIES = 5
 
 export class Arduino {
   private readonly logger = new Logger(`${LOGS_CONTEXT}-${this.serialPort}`)
   private readonly parser = new SerialPort.parsers.Readline({ delimiter: '\n' })
+  private reconnectTries = 0
   private port: SerialPort
 
   constructor (
@@ -22,6 +24,12 @@ export class Arduino {
   private async reconnect () {
     this.logger.warn('Connection closed, trying restart connection')
 
+    if (this.isDisconnectedPort()) {
+      this.logger.warn('The device has reached the maximum number of reconnection attempts, it will disconnect')
+      return
+    }
+    this.reconnectTries++
+
     try {
       await promisify(this.port.close.bind(this.port))()
     } catch (e) {}
@@ -31,6 +39,10 @@ export class Arduino {
     setTimeout(async () => {
       await this.initConnection()
     }, CONNECTION_DELAY)
+  }
+
+  isDisconnectedPort () {
+    return !this.port?.isOpen && this.reconnectTries >= MAX_RECONNECT_TRIES
   }
 
   async initConnection (): Promise<void> {
@@ -45,6 +57,7 @@ export class Arduino {
 
       this.port.on('open', () => {
         this.logger.log('Connection open')
+        this.reconnectTries = 0
 
         resolve()
       })

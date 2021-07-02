@@ -81,7 +81,7 @@ export class OnvifDiscovery {
       })
     )
     subscribe.next(this.cameras)
-    setInterval(async () => this.searchCameras(subscribe), RELOAD_DEVICES_TIME)
+    setTimeout(async () => this.searchCameras(subscribe), RELOAD_DEVICES_TIME)
   }
 
   discover (): Observable<InstancedCamera[]> {

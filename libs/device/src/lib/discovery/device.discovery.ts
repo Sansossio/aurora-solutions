@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { defer, Observable, Subscriber } from 'rxjs'
+import { Observable, Subscriber } from 'rxjs'
 import * as SerialPort from 'serialport'
 import { Arduino } from '../arduino/arduino'
 import { DeviceType } from '../device.type'
@@ -19,27 +19,25 @@ interface DeviceDiscoveryPorts {
 @Injectable()
 export class DeviceDiscovery {
   private readonly logger = new Logger(LOGGER_CONTEXT)
-  private readonly devices: DeviceDiscoveryDto[] = []
+  private devices: DeviceDiscoveryDto[] = []
 
-  private searchAvailablePorts (): Observable<DeviceDiscoveryPorts[]> {
-    return defer(async () => {
-      const ports = await SerialPort.list()
-      const data = await Promise.all(ports.map(async port => {
-        if (!this.isAValidPort(port) || !!this.devices.find(dv => dv.com === port.path)) {
-          return
-        }
-        const player = new Arduino(port.path)
-        await player.initConnection()
+  private async searchAvailablePorts (): Promise<DeviceDiscoveryPorts[]> {
+    const ports = await SerialPort.list()
+    const data = await Promise.all(ports.map(async port => {
+      if (!this.isAValidPort(port) || !!this.devices.find(dv => dv.com === port.path)) {
+        return
+      }
+      const player = new Arduino(port.path)
+      await player.initConnection()
 
-        return {
-          com: port.path,
-          port,
-          player
-        }
-      }))
+      return {
+        com: port.path,
+        port,
+        player
+      }
+    }))
 
-      return data.filter(d => !!d)
-    })
+    return data.filter(d => !!d)
   }
 
   private isAValidPort (port: SerialPort.PortInfo) {
@@ -53,41 +51,48 @@ export class DeviceDiscovery {
     return DeviceType.UNKNOW
   }
 
-  private searchDevices (subscriber: Subscriber<DeviceDiscoveryDto[]>) {
-    this.searchAvailablePorts().subscribe((ports) => {
-      for (const port of ports) {
-        void port.player.write(GET_TYPE_EVENT)
+  private clearDevices () {
+    this.devices = this.devices.filter(d => !d.player.isDisconnectedPort())
+    return this.devices
+  }
 
-        const sub = port
-          .player
-          .getEvents()
-          .subscribe((data) => {
-            if (typeof data === 'string') {
-              return
-            }
+  private async searchDevices (subscriber: Subscriber<DeviceDiscoveryDto[]>) {
+    this.clearDevices()
+    const availablePorts = await this.searchAvailablePorts()
 
-            const device = {
-              com: port.com,
-              type: this.getType(data.type),
-              player: port.player
-            }
+    subscriber.next(this.devices)
 
-            subscriber.next(this.devices)
-            sub.unsubscribe()
+    for (const port of availablePorts) {
+      void port.player.write(GET_TYPE_EVENT)
 
-            this.devices.push(device)
+      const sub = port
+        .player
+        .getEvents()
+        .subscribe((data) => {
+          if (typeof data === 'string') {
+            return
+          }
 
-            this.logger.log(`New device "${device.type}" registered (COM: ${device.com})`)
-          })
-      }
+          const device = {
+            com: port.com,
+            type: this.getType(data.type),
+            player: port.player
+          }
 
-      setInterval(() => this.searchDevices(subscriber), RELOAD_DEVICES_TIME)
-    })
+          subscriber.next(this.devices)
+          sub.unsubscribe()
+
+          this.devices.push(device)
+
+          this.logger.log(`New device "${device.type}" registered (COM: ${device.com})`)
+        })
+    }
+    setTimeout(async () => this.searchDevices(subscriber), RELOAD_DEVICES_TIME)
   }
 
   discover (): Observable<DeviceDiscoveryDto[]> {
     return new Observable((subscriber) => {
-      this.searchDevices(subscriber)
+      void this.searchDevices(subscriber)
     })
   }
 }
