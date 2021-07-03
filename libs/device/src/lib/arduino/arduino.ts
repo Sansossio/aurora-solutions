@@ -13,6 +13,7 @@ const MAX_RECONNECT_TRIES = 5
 export class Arduino {
   private readonly logger = new Logger(`${LOGS_CONTEXT}-${this.serialPort}`)
   private readonly parser = new SerialPort.parsers.Readline({ delimiter: '\n' })
+  private events: Observable<any>
   private reconnectTries = 0
   private port: SerialPort
 
@@ -20,6 +21,28 @@ export class Arduino {
     private readonly serialPort: string,
     private readonly baudRate: number = DEFAULT_BRAUDRATE
   ) {}
+
+  private openSerialPortEvents (): Observable<any> {
+    if (!this.port?.isOpen) {
+      return of()
+        .pipe(
+          delay(CONNECTION_DELAY),
+          mergeMap(() => this.getEvents())
+        )
+    }
+
+    return new Observable((subscriber) => {
+      this.parser.on('data', (data) => {
+        const val: string = data.toString()
+
+        try {
+          subscriber.next(JSON.parse(val))
+        } catch (e) {
+          subscriber.next(val)
+        }
+      })
+    })
+  }
 
   private async reconnect () {
     this.logger.warn('Connection closed, trying restart connection')
@@ -36,9 +59,12 @@ export class Arduino {
 
     this.port = null
 
-    setTimeout(async () => {
-      await this.initConnection()
-    }, CONNECTION_DELAY)
+    setTimeout(
+      () => {
+        void this.initConnection()
+      },
+      CONNECTION_DELAY
+    )
   }
 
   isDisconnectedPort () {
@@ -59,14 +85,21 @@ export class Arduino {
         this.logger.log('Connection open')
         this.reconnectTries = 0
 
-        resolve()
+        setTimeout(
+          () => {
+            this.events = this.openSerialPortEvents()
+            resolve()
+          },
+          CONNECTION_DELAY
+        )
       })
 
       this.port.on('error', async (e) => {
         this.logger.error(e)
-        if (!e.message?.includes('Access denied')) {
-          void this.reconnect()
+        if (e.message?.includes('Access denied')) {
+          this.reconnectTries = MAX_RECONNECT_TRIES
         }
+        void this.reconnect()
       })
 
       this.port.on('close', () => {
@@ -76,34 +109,12 @@ export class Arduino {
   }
 
   async write (message: string) {
-    if (!this.port?.isOpen) {
-      return
-    }
-
     delayCb(() => {
-      this.port.write(`${message}\n`)
+      this.port?.write(`${message}\n`)
     })
   }
 
   getEvents (): Observable<any> {
-    if (!this.port?.isOpen) {
-      return of()
-        .pipe(
-          delay(CONNECTION_DELAY),
-          mergeMap(() => this.getEvents())
-        )
-    }
-
-    return new Observable((subscriber) => {
-      this.parser.on('data', (data) => {
-        const val: string = data.toString()
-
-        try {
-          subscriber.next(JSON.parse(val))
-        } catch (e) {
-          subscriber.next(val)
-        }
-      })
-    })
+    return this.events
   }
 }

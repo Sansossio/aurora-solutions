@@ -1,14 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Observable, Subscriber } from 'rxjs'
+import { timeout } from 'rxjs/operators'
 import * as SerialPort from 'serialport'
 import { Arduino } from '../arduino/arduino'
 import { DeviceType } from '../device.type'
 import { DeviceDiscoveryDto } from './device.discovery.dto'
 
 const RELOAD_DEVICES_TIME = 10 * 1000 // 10s
+const DEVICE_RESPONSE_TIMEOUT = 10 * 1000 // 10s response timeout
 const GET_TYPE_EVENT = 'GET_TYPE'
 
-const LOGGER_CONTEXT = 'DEVICE_DISCOVERY'
+const LOGGER_CONTEXT = 'DeviceDiscovery'
 
 interface DeviceDiscoveryPorts {
   port: SerialPort.PortInfo
@@ -44,9 +46,9 @@ export class DeviceDiscovery {
     return port.manufacturer.toLowerCase().includes('arduino')
   }
 
-  private getType (type: string): DeviceType {
-    if (Object.keys(DeviceType).includes(type)) {
-      return type as DeviceType
+  private getType (data: string | { type: DeviceType }): DeviceType {
+    if (typeof data !== 'string' && Object.values(DeviceType).includes(data.type)) {
+      return data.type
     }
     return DeviceType.UNKNOW
   }
@@ -64,28 +66,32 @@ export class DeviceDiscovery {
 
     for (const port of availablePorts) {
       void port.player.write(GET_TYPE_EVENT)
-
       const sub = port
         .player
         .getEvents()
-        .subscribe((data) => {
-          if (typeof data === 'string') {
-            return
+        .pipe(
+          timeout(DEVICE_RESPONSE_TIMEOUT)
+        )
+        .subscribe(
+          (data) => {
+            const device = {
+              com: port.com,
+              type: this.getType(data),
+              player: port.player
+            }
+
+            subscriber.next(this.devices)
+            sub.unsubscribe()
+
+            this.devices.push(device)
+
+            this.logger.log(`New device "${device.type}" registered (Port: ${device.com})`)
+          },
+          // Unsubscribe from any error
+          () => {
+            sub.unsubscribe()
           }
-
-          const device = {
-            com: port.com,
-            type: this.getType(data.type),
-            player: port.player
-          }
-
-          subscriber.next(this.devices)
-          sub.unsubscribe()
-
-          this.devices.push(device)
-
-          this.logger.log(`New device "${device.type}" registered (COM: ${device.com})`)
-        })
+        )
     }
     setTimeout(async () => this.searchDevices(subscriber), RELOAD_DEVICES_TIME)
   }

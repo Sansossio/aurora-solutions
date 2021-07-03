@@ -22,8 +22,6 @@ void setup()
   lcd.begin(16, 2);
   lcd.setCursor(0, 1);
   lcd.print(DEFAULT_MESSAGE);
-
-  sendDeviceType("SCREEN");
 }
 
 void sendDeviceType(String type)
@@ -39,6 +37,7 @@ void printFromSerial()
 {
   while (Serial.available() > 0)
   {
+    delay(3);
     char recieved = Serial.read();
     inData += recieved;
 
@@ -46,7 +45,12 @@ void printFromSerial()
     if (recieved == '\n')
     {
       inData.trim();
-      Serial.println(inData);
+
+      if (inData == "GET_TYPE") {
+        sendDeviceType("SCREEN");
+        inData = "";
+        return;
+      }
 
       if (inData == "")
       {
