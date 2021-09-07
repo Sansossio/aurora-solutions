@@ -1,5 +1,7 @@
 # Aurora Solutions
 
+Using RTSP Protocol with websockets and socketio
+
 ### Backend
 
 [NestJS](https://nestjs.com/)
