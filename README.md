@@ -1,6 +1,10 @@
 # Aurora Solutions
 
-Using RTSP Protocol with websockets and socketio
+Using RTSP Protocol with websockets and socketio.
+Features:
+- Wifi cameras streaming
+- Motion sensor
+  - Detect and send event to frontend and print on a arduino screen
 
 ### Backend
 
